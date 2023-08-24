@@ -35,7 +35,7 @@ header: |-
     Trax
     Lemmy
     CF207
-    BGT
+    bentglasstube
     Fon2D2
 
   This file will assemble to a binary-identical version of the PRG
@@ -113,6 +113,15 @@ global_symbols:
   0xbc: {symbol: enemy_ram_idx}
   0xc2: {symbol: enemy_hp}
   0xd1: {symbol: sidview_width_maybe}
+  0xe0: {symbol: note_data_addr_lo}
+  0xe1: {symbol: note_data_addr_hi}
+  0xe2: {symbol: song_offset}
+  0xe3: {symbol: phrase_index}
+  0xe4: {symbol: drum_loop_offset}
+  0xe5: {symbol: duration_offset}
+  0xe6: {symbol: pulse1_low_byte}
+  0xe7: {symbol: pulse2_low_byte}
+  0xe8: {symbol: pitch_storage}
   0xe9: {symbol: sound_fx_dmc}
   0xea: {symbol: sound_pause}
   0xeb: {symbol: sound_song}
@@ -137,9 +146,10 @@ global_symbols:
   0x707: {symbol: world}
   0x70c: {symbol: link_magic_refill}
   0x70d: {symbol: link_life_refill}
+  0x736: {symbol: game_mode}
   0x755: {symbol: link_xp_add_hi}
   0x756: {symbol: link_xp_add_lo}
-  0x736: {symbol: game_mode}
+  0x75f: {symbol: queued_song}
   0x769: {symbol: bank}
   0x76c: {symbol: game_routine}
   0x770: {symbol: next_xp_hi}
@@ -173,6 +183,42 @@ global_symbols:
   0x794: {symbol: link_num_crystals}
   0x79f: {symbol: link_num_deaths}
   0x7a0: {symbol: link_name}
+  0x7ac: {symbol: falling_in_hole}
+  0x7db: {symbol: song_after_fanfare}
+  0x7dc: {symbol: sfx_sweep_dir}
+  0x7dd: {symbol: sfx_ec_counter}
+  0x7de: {symbol: sfx_sweep_temp}
+  0x7df: {symbol: sfx_ec_using_pulse}
+  0x7e0: {symbol: sfx_ec_using_noise}
+  0x7e1: {symbol: sfx_ec_playing}
+  0x7e2: {symbol: harmony_envelope}
+  0x7e3: {symbol: melody_envelope}
+  0x7e4: {symbol: drums_duration}
+  0x7e5: {symbol: bass_duration}
+  0x7e6: {symbol: harmony_duration}
+  0x7e7: {symbol: melody_duration}
+  0x7e8: {symbol: drums_note_pointer}
+  0x7e9: {symbol: bass_note_pointer}
+  0x7ea: {symbol: harmony_note_pointer}
+  0x7eb: {symbol: melody_note_pointer}
+  0x7ec: {symbol: ganon_laugh_counter}
+  0x7ed: {symbol: sfx_e9_counter2}
+  0x7ee: {symbol: sfx_e9_counter1}
+  0x7ef: {symbol: sfx_ec_pitch}
+  0x7f0: {symbol: sfx_ec_pwm}
+  0x7f1: {symbol: sfx_ec_envelope}
+  0x7f2: {symbol: sfx_ec_index}
+  0x7f3: {symbol: sfx_ec_note_counter}
+  0x7f5: {symbol: sfx_ed_counter}
+  0x7f6: {symbol: sfx_sweep_pitch}
+  0x7f7: {symbol: sfx_ee_counter}
+  0x7f9: {symbol: sfx_ef_counter}
+  0x7fa: {symbol: sfx_e9_playing}
+  0x7fb: {symbol: current_song}
+  0x7fc: {symbol: sfx_ec_playing_backup}
+  0x7fd: {symbol: sfx_ed_playing}
+  0x7fe: {symbol: sfx_ee_playing}
+  0x7ff: {symbol: sfx_ef_playing}
   0x2000: {symbol: PPUCTRL}
   0x2001: {symbol: PPUMASK}
   0x2002: {symbol: PPUSTATUS}
@@ -1713,6 +1759,7 @@ segment:
       ----------------------------------------------------------------------
     range:
       - Code: [0x8000, 0x8016]
+      - Words: [0x808f, 0x810e]
       - Code: [0x810f, 0x811c]
       - Code: [0x8120, 0x8143]
       - Code: [0x8147, 0x823b]
@@ -1732,94 +1779,268 @@ segment:
       - Code: [0x9978, 0x9992]
       - Code: [0x9996, 0x9a6f]
       - Code: [0x9a98, 0x9da7]
+      - Words: [0xbffa, 0xbfff]
 
     address:
-      0x8000: {symbol: Bank6__Code_0}
-      0x8017: {symbol: Bank6__UNKNOWN_0}
-      0x810F: {symbol: Bank6__Code_1}
-      0x84DA: {symbol: Index_Table_0}
-      0x84EB: {symbol: Phrase_Order_Table_0}
-      0x84FF: {symbol: Phrase_Pointer_Table_0__01}
-      0x8505: {symbol: Phrase_Pointer_Table_0__02}
-      0x850B: {symbol: Phrase_Pointer_Table_0__03}
-      0x8517: {symbol: Phrase_Pointer_Table_0__05}
-      0x851D: {symbol: Phrase_Pointer_Table_0__06}
-      0x8539: {symbol: Song_Data_0__Square1__00}
+      0x8000: {symbol: TitleMusicLoop}
+      0x8017: {symbol: TitleEnvelopeTable}
+      0x8074: {symbol: TitleSaveDeleteEffect}
+      0x8084: {symbol: TitleDurationTable}
+      0x808F: {symbol: TitlePitchTable}
+      0x810F: {symbol: TitleConfigPulse1}
+      0x8116: {symbol: TitleConfigPulse2}
+      0x811D: {symbol: TitleConfigPlayPulse1}
+      0x8120: {symbol: TitlePlayPulse1}
+      0x8122: {symbol: TitlePlayNote}
+      0x8144: {symbol: TitleConfigPlayPulse2}
+      0x8147: {symbol: TitlePlayPulse2}
+      0x814B: {symbol: TitlePlayTriangle}
+      0x814F: {symbol: TitleGetNoteDuration}
+      0x815A: {symbol: TitleVibratoP1SFX}
+      0x815E: {symbol: TitleVibratoHarmony}
+      0x8160: {symbol: TitleVibratoPulse1}
+      0x8167: {symbol: TitleVibratoP2SFX}
+      0x816B: {symbol: TitleVibratoMelody}
+      0x816D: {symbol: TitleVibratoPulse2}
+      0x8172: {symbol: TitleVibrato}
+      0x818C: {symbol: TitleStartSFX}
+      0x819C: {symbol: TitleSFXLetterEntryStart}
+      0x81AF: {symbol: TitleSFXLetterEntryDecay}
+      0x81C9: {symbol: TitleSFXLetterCursorStart}
+      0x81D6: {symbol: TitleSFXMenuCursorStart}
+      0x81E1: {symbol: TitlePlayBitone}
+      0x81FE: {symbol: TitleVibratoSFX}
+      0x8204: {symbol: TitleSFXDecrement}
+      0x821B: {symbol: TitleSoundFXEB}
+      0x823C: {symbol: TitleSFXSaveDeleteStart}
+      0x8249: {symbol: TitleSFXSaveDeleteDecay}
+      0x826A: {symbol: TitlePlayMusic}
+      0x8293: {symbol: TitleInitMusic}
+      0x82CF: {symbol: TitleLoadSong}
+      0x82EF: {symbol: TitleLoadSongData}
+      0x8347: {symbol: TitlePlayIntroDelay}
+      0x837F: {symbol: TitlePlayMelody}
+      0x840A: {symbol: TitlePlayHarmony}
+      0x845B: {symbol: TitlePlayBass}
+      0x849B: {symbol: TitlePlayDrums}
+      0x84DA: {symbol: SongTableTitle}
+      0x84E2: {symbol: PhraseDataTitle}
+      0x84F9: {symbol: PhraseTablesTitle}
+      0x8539: {symbol: NoteDataTitleInto}
+      0x853F: {symbol: NoteDataTitleStart1}
+      0x857E: {symbol: NoteDataTitleStart2}
+      0x85C2: {symbol: NoteDataTitleBuildup}
+      0x863D: {symbol: NoteDataTitleMain}
+      0x86C4: {symbol: NoteDataTitleBreakdown1}
+      0x8709: {symbol: NoteDataTitleBreakdown2}
+      0x874D: {symbol: NoteDataTitleBreakdown3}
       0x878C: {symbol: Bank6__UNUSED_0}
-      0x9000: {symbol: Bank6__Code_2}
-      0x90E9: {symbol: Bank6__UNKNOWN_2}
-      0x920B: {symbol: Bank6__Code_3}
-      0x963A: {symbol: Bank6__UNKNOWN_3}
-      0x9794: {symbol: Bank6__Code_4}
+      0x9000: {symbol: MainMusicLoop}
+      0x9031: {symbol: ConfigurePulse1}
+      0x9038: {symbol: ConfigurePulse2}
+      0x903F: {symbol: ConfigPlayPulse1}
+      0x9042: {symbol: PlayNotePulse1}
+      0x9044: {symbol: PlayNote}
+      0x9064: {symbol: ConfigPlayPulse2}
+      0x9067: {symbol: PlayNotePulse2}
+      0x906B: {symbol: PlayNoteTriangle}
+      0x906F: {symbol: GetNoteDuration}
+      0x907F: {symbol: VibratoDitty}
+      0x9089: {symbol: VibratoPulse1}
+      0x9097: {symbol: VibratoPulse2}
+      0x909E: {symbol: Vibrato}
+      0x90B5: {symbol: SFXLinkFallCancelOther}
+      0x90CB: {symbol: Shift5Sweep}
+      0x90CC: {symbol: Shift4Sweep}
+      0x90CD: {symbol: Shift3Sweep}
+      0x90E9: {symbol: SwordStrikeSamples}
+      0x90F8: {symbol: EnemyKilledEnvelope}
+      0x90FE: {symbol: EnemyKilledPitch}
+      0x9104: {symbol: SwordBeamEnvelope}
+      0x9123: {symbol: EnemyHurtSamples}
+      0x912C: {symbol: BreakBlockSamples}
+      0x9135: {symbol: PulseEnvelope}
+      0x914D: {symbol: NoteDurationTable}
+      0x917D: {symbol: DMCSamples}
+      0x920B: {symbol: PlaySoundFXE9}
+      0x9221: {symbol: SFXLinkInjured}
+      0x9230: {symbol: SFXGanonLaugh}
+      0x9241: {symbol: SFXNextGanonChuckle}
+      0x924B: {symbol: PrepDMCSample}
+      0x9264: {symbol: PlayDMCSample}
+      0x929C: {symbol: SFXCancelMany}
+      0x92BE: {symbol: SFXItemDropStart}
+      0x92CF: {symbol: SFXItemDropDecay}
+      0x92DE: {symbol: SFXCursorStart}
+      0x92E6: {symbol: SFXCursorDecay}
+      0x92F4: {symbol: PlaySoundFXEF}
+      0x92FD: {symbol: PlaySoundFXEFCont}
+      0x9334: {symbol: SFXKillBeamStart}
+      0x934C: {symbol: SFXKillBeamDecay}
+      0x937A: {symbol: SFXElevatorStart}
+      0x9389: {symbol: SFXElevatorDecay}
+      0x939E: {symbol: SFXEFDecay}
+      0x93AE: {symbol: SFXLowHealthBeep}
+      0x93C3: {symbol: SFXEncounterCancelOther}
+      0x93E5: {symbol: SFXLinkFallStart}
+      0x93F9: {symbol: SFXLinkFallDecay}
+      0x9408: {symbol: PlaySoundFXEE}
+      0x942B: {symbol: SFXEnterBattleStart}
+      0x9447: {symbol: SFXEnterBattleDecay}
+      0x9490: {symbol: SFXExitBattleStart}
+      0x94AE: {symbol: SFXExitBattleDecay}
+      0x94ED: {symbol: SFXOpenMenuStart}
+      0x94FE: {symbol: SFXOpenMenuDecay}
+      0x9515: {symbol: PlaySoundFXEE2}
+      0x952B: {symbol: SFXTink}
+      0x953C: {symbol: SFXEEDecay}
+      0x954C: {symbol: SFXSwampWalk}
+      0x956C: {symbol: SFXCrumbleBridgeStart}
+      0x9587: {symbol: SFXNoiseDecay}
+      0x9597: {symbol: SFXNoiseBurst}
+      0x959D: {symbol: PlayNoise}
+      0x95A7: {symbol: PlaySoundFXED}
+      0x95E6: {symbol: SFXBreakDamageStart}
+      0x95EE: {symbol: SFXBreakDamageDecay}
+      0x9604: {symbol: SFXSwordSlashStart}
+      0x960C: {symbol: SFXSwordStrikeDecay}
+      0x9612: {symbol: PlayNoiseSample}
+      0x963A: {symbol: DittyRaftDuration}
+      0x963F: {symbol: DittyRaftNote}
+      0x9644: {symbol: DittyFluteDuration}
+      0x964B: {symbol: DittyFluteNote}
+      0x9652: {symbol: DittyFlute2Duration}
+      0x9658: {symbol: DittyFlute2Note}
+      0x965E: {symbol: DittyFlute3Duration}
+      0x9667: {symbol: DittyFlute3Note}
+      0x9670: {symbol: DittyEnvelope}
+      0x969F: {symbol: SnareEnvelope}
+      0x96A6: {symbol: SwordBlockEnvelope}
+      0x96B6: {symbol: SwordBlockNote}
+      0x96D5: {symbol: LinkDeathPitchLo}
+      0x96D9: {symbol: LinkDeathPitchHi}
+      0x96DD: {symbol: LinkDeathDuration}
+      0x970D: {symbol: LinkDeathEnvStart}
+      0x9726: {symbol: LinkDeathEnvelopeOdd}
+      0x9736: {symbol: LinkDeathEnvelopeEven}
+      0x9745: {symbol: SpellCastPitchLo}
+      0x9749: {symbol: SpellCastDuration}
+      0x9755: {symbol: SpellCastEnvStart}
+      0x975C: {symbol: SpellCastEnvelopeEven}
+      0x976C: {symbol: SpellCastEnvelopeOdd}
+      0x977B: {symbol: SpellCastPitchHi}
+      0x9780: {symbol: BossDeathSamples}
+      0x978E: {symbol: BossDeathDuration}
+      0x9794: {symbol: SFXECPrepNoise}
+      0x97BA: {symbol: SFXECPrepPulse}
+      0x97E0: {symbol: SFXRaftDittyStart}
+      0x97EC: {symbol: SFXRaftDittyDecay}
+      0x9805: {symbol: SFXDittyDecay}
+      0x9817: {symbol: SFXSnareStart}
+      0x9828: {symbol: SFXSnareDecay}
+      0x9834: {symbol: SFXLinkDeathStart}
+      0x9860: {symbol: SFXLinkDeathDecay}
+      0x98C8: {symbol: SFXSwordBlockStart}
+      0x98D4: {symbol: SFXSwordBlockDecay}
+      0x98E9: {symbol: SFXECDecay}
+      0x990B: {symbol: PlaySoundFXEC}
+      0x99A2: {symbol: SFXSpellCastStart}
+      0x99B8: {symbol: SFXSpellCastDecay}
+      0x9A20: {symbol: SFXFluteDittyStart}
+      0x9A2C: {symbol: SFXFluteDittyDecay}
+      0x9A48: {symbol: SFXFluteDitty2Start}
+      0x9A54: {symbol: SFXFluteDitty2Decay}
+      0x9A70: {symbol: SFXFluteDitty3Start}
+      0x9A7C: {symbol: SFXFluteDitty3Decay}
+      0x9A98: {symbol: SFXBindingForceStart}
+      0x9AAB: {symbol: SFXBindingForceDecay}
+      0x9AD1: {symbol: SFXBossDeathStart}
+      0x9ADD: {symbol: SFXBossDeathDecay}
+      0x9B18: {symbol: PlayMusic}
+      0x9B24: {symbol: LoadPhrase}
+      0x9B3B: {symbol: MuteChannelsAll}
+      0x9B43: {symbol: MuteChannelsPulseNoise}
+      0x9B4F: {symbol: PlayNextSong}
+      0x9B61: {symbol: LoadSong}
+      0x9B80: {symbol: LoadSongData}
+      0x9C74: {symbol: ResetSong}
+      0x9C87: {symbol: PlayMelody}
+      0x9CDE: {symbol: PlayHarmony}
+      0x9D3C: {symbol: PlayBass}
+      0x9D6C: {symbol: PlayDrums}
       0x9DA8: {symbol: Bank6__UNUSED_1}
-      0xA000: {symbol: Index_Table_1}
-      0xA00A: {symbol: Phrase_Order_Table_1}
-      0xA073: {symbol: Song_Data_1__Square1__00}
-      0xA0EB: {symbol: Song_Data_1__Square1__01}
-      0xA148: {symbol: Song_Data_1__Square1__02}
-      0xA173: {symbol: Song_Data_1__Square1__03}
-      0xA1A2: {symbol: Song_Data_1__Square1__04}
-      0xA1DA: {symbol: Song_Data_1__Square1__05}
-      0xA1FC: {symbol: Song_Data_1__Square1__06}
-      0xA21D: {symbol: Song_Data_1__Square1__07}
-      0xA242: {symbol: Song_Data_1__Square1__08}
-      0xA25F: {symbol: Song_Data_1__Square1__09}
-      0xA295: {symbol: Song_Data_1__Square1__0A}
-      0xA2CE: {symbol: Song_Data_1__Square1__0B}
-      0xA326: {symbol: Song_Data_1__Square1__0C}
-      0xA3B1: {symbol: Song_Data_1__Square1__0D}
-      0xA3CA: {symbol: Index_Table_2}
-      0xA3D4: {symbol: Phrase_Order_Table_2}
-      0xA420: {symbol: Song_Data_2__Square1__00}
-      0xA43D: {symbol: Song_Data_2__Square1__01}
-      0xA47B: {symbol: Song_Data_2__Square1__02}
-      0xA4BC: {symbol: Song_Data_2__Square1__03}
-      0xA4F5: {symbol: Song_Data_2__Square1__04}
-      0xA53B: {symbol: Song_Data_2__Square1__05}
-      0xA57C: {symbol: Song_Data_2__Square1__06}
-      0xA59F: {symbol: Song_Data_2__Square1__07}
-      0xA5CE: {symbol: Song_Data_2__Square1__08}
-      0xA60D: {symbol: Song_Data_2__Square1__09}
-      0xA62F: {symbol: Index_Table_3}
-      0xA639: {symbol: Phrase_Order_Table_3}
-      0xA6BE: {symbol: Song_Data_3__Square1__00}
-      0xA6D9: {symbol: Song_Data_3__Square1__01}
-      0xA728: {symbol: Song_Data_3__Square1__02}
-      0xA747: {symbol: Song_Data_3__Square1__03}
-      0xA765: {symbol: Song_Data_3__Square1__04}
-      0xA786: {symbol: Song_Data_3__Square1__05}
-      0xA7B6: {symbol: Song_Data_3__Square1__06}
-      0xA7E6: {symbol: Song_Data_3__Square1__07}
-      0xA808: {symbol: Song_Data_3__Square1__08}
-      0xA845: {symbol: Song_Data_3__Square1__09}
-      0xA882: {symbol: Song_Data_3__Square1__0A}
-      0xA8BF: {symbol: Song_Data_3__Square1__0D}
-      0xA8D8: {symbol: Song_Data_3__Square1__0E}
-      0xA8EE: {symbol: Song_Data_3__Square1__0F}
-      0xA904: {symbol: Song_Data_3__Square1__0B}
-      0xA91D: {symbol: Song_Data_3__Square1__0C}
-      0xA936: {symbol: Index_Table_4}
-      0xA940: {symbol: Phrase_Order_Table_4}
-      0xA9C0: {symbol: Song_Data_4__Square1__00}
-      0xA9E2: {symbol: Song_Data_4__Square1__01}
-      0xAA2A: {symbol: Song_Data_4__Square1__02}
-      0xAA76: {symbol: Song_Data_4__Square1__03}
-      0xAA91: {symbol: Song_Data_4__Square1__04}
-      0xAAAC: {symbol: Song_Data_4__Square1__05}
-      0xAAB9: {symbol: Song_Data_4__Square1__0C}
-      0xAADA: {symbol: Song_Data_4__Square1__0D}
-      0xAAED: {symbol: Song_Data_4__Square1__0B}
-      0xAB06: {symbol: Song_Data_4__Square1__0E}
-      0xAB33: {symbol: Song_Data_4__Square1__0F}
-      0xAB4A: {symbol: Song_Data_4__Square1__06}
-      0xAB71: {symbol: Song_Data_4__Square1__07}
-      0xAB95: {symbol: Song_Data_4__Square1__08}
-      0xABB7: {symbol: Song_Data_4__Square1__09}
-      0xABDB: {symbol: Song_Data_4__Square1__0A}
+      0xA000: {symbol: SongTableOverworld}
+      0xA008: {symbol: PhraseDataOverworld}
+      0xA01F: {symbol: PhraseTablesOverworld}
+      0xA073: {symbol: NoteDataOverworldIntro}
+      0xA0DB: {symbol: NoteDataOverworldTheme1}
+      0xA138: {symbol: NoteDataOverworldTheme2}
+      0xA15B: {symbol: NoteDataOverworldTheme3}
+      0xA192: {symbol: NoteDataOverworldTheme4}
+      0xA1CA: {symbol: NoteDataOverworldTheme5}
+      0xA1EC: {symbol: NoteDataOverworldTheme6}
+      0xA20D: {symbol: NoteDataOverworldTheme7}
+      0xA232: {symbol: NoteDataOverworldTheme8}
+      0xA24F: {symbol: NoteDataBattleTheme1}
+      0xA285: {symbol: NoteDataBattleTheme2}
+      0xA2BE: {symbol: NoteDataBattleTheme3}
+      0xA316: {symbol: NoteDataBattleTheme4}
+      0xA3A1: {symbol: NoteDataOWItemFanfare}
+      0xA3CA: {symbol: SongTableTown}
+      0xA3DA: {symbol: PhraseDataTown}
+      0xA3E4: {symbol: PhraseTableTown}
+      0xA420: {symbol: NoteDataTownIntro}
+      0xA43D: {symbol: NoteDataTownTheme1}
+      0xA47B: {symbol: NoteDataTownTheme2}
+      0xA4BC: {symbol: NoteDataTownTheme3}
+      0xA4F5: {symbol: NoteDataTownTheme4}
+      0xA53B: {symbol: NoteDataTownTheme5}
+      0xA57C: {symbol: NoteDataTownTheme6}
+      0xA59F: {symbol: NoteDataTownTheme7}
+      0xA5CE: {symbol: NoteDataHouseTheme}
+      0xA60D: {symbol: NoteDataTownItemFanfare}
+      0xA62F: {symbol: SongTablePalace}
+      0xA637: {symbol: PhraseDataPalace}
+      0xA65E: {symbol: PhraseTablePalace}
+      0xA6BE: {symbol: NoteDataPalaceIntro}
+      0xA6D9: {symbol: NoteDataPalaceTheme1}
+      0xA728: {symbol: NoteDataPalaceTheme2}
+      0xA747: {symbol: NoteDataPalaceTheme3}
+      0xA765: {symbol: NoteDataPalaceTheme4}
+      0xA786: {symbol: NoteDataPalaceTheme5}
+      0xA7B6: {symbol: NoteDataPalaceTheme6}
+      0xA7E6: {symbol: NoteDataPalaceTheme7}
+      0xA808: {symbol: NoteDataPalaceTheme8}
+      0xA845: {symbol: NoteDataPalaceTheme9}
+      0xA882: {symbol: NoteDataPalaceTheme10}
+      0xA8BF: {symbol: NoteDataBossBattle1}
+      0xA8D8: {symbol: NoteDataBossBattle2}
+      0xA8EE: {symbol: NoteDataPalaceItemFanfare}
+      0xA904: {symbol: NoteDataGemPlacement1}
+      0xA91D: {symbol: NoteDataGemPlacement2}
+      0xA936: {symbol: SongTableGreatPalace}
+      0xA93E: {symbol: PhraseDataGreatPalace}
+      0xA960: {symbol: PhraseTableGreatPalace}
+      0xA9C0: {symbol: NoteDataGPIntro}
+      0xA9E2: {symbol: NoteDataGPTheme1}
+      0xAA2A: {symbol: NoteDataGPTheme2}
+      0xAA76: {symbol: NoteDataGPTheme3}
+      0xAA91: {symbol: NoteDataGPTheme4}
+      0xAAAC: {symbol: NoteDataGPTheme5}
+      0xAAB9: {symbol: NoteDataZeldaTheme}
+      0xAADA: {symbol: NoteDataCreditsTheme1}
+      0xAAED: {symbol: NoteDataCreditsTheme2}
+      0xAB06: {symbol: NoteDataCreditsTheme3}
+      0xAB33: {symbol: NoteDataCreditsTheme4}
+      0xAB4A: {symbol: NoteDataGPItemFanfare}
+      0xAB71: {symbol: NoteDataTriforceFanfare1}
+      0xAB95: {symbol: NoteDataTriforceFanfare2}
+      0xABB7: {symbol: NoteDataFinalBossTheme1}
+      0xABDB: {symbol: NoteDataFinalBossTheme2}
       0xAC09: {symbol: Bank6__UNUSED_2}
       0xBF70: {symbol: ending_routines}
       0xBFE0: {symbol: Bank6__UNUSED_3}
-      0xBFFA: {symbol: ending_bytes}
+      0xBFFA: {symbol: ending_words}
 
   - name: "bank7"
     prgbank: 7
